@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 /**
- * Specific openAI provider for text-to-speech (TTS) capabilities.
+ * Specific openAI  extensions (for text-to-speech (TTS) capabilities and other).
  *
  * @package     aiprovider_openai_extension
  * @copyright   2025 Laurent David <laurent@call-learning.fr>

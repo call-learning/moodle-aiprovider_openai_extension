@@ -15,13 +15,13 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Specific openAI provider for text-to-speech (TTS) capabilities.
+ * Specific openAI  extensions (for text-to-speech (TTS) capabilities and other).
  *
  * @package     aiprovider_openai_extension
  * @copyright   2025 Laurent David <laurent@call-learning.fr>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-$string['pluginname'] = 'OpenAI TTS';
+$string['pluginname'] = 'OpenAI extension provider';
 $string['plugindesc'] = 'Minimal provider that reuses settings from the OpenAI provider and exposes a Text-to-Speech action.';
 
 $string['action:convert_text_to_speech:endpoint'] = 'Endpoint';

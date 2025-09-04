@@ -13,12 +13,14 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+
 namespace aiprovider_openai_extension;
 
+use core_ai\aiactions\generate_image;
 use local_aixtension\aiactions\convert_text_to_speech;
 
 /**
- * Specific openAI provider for text-to-speech (TTS) capabilities.
+ * Specific openAI  extensions (for text-to-speech (TTS) capabilities and other).
  *
  * @package   aiprovider_openai_extension
  * @copyright   2025 Laurent David <laurent@call-learning.fr>
@@ -51,7 +53,8 @@ class provider extends \aiprovider_openai\provider {
     #[\Override]
     public function get_action_list(): array {
         return [
-            convert_text_to_speech::class
+            convert_text_to_speech::class,
+            generate_image::class,
         ];
     }
 
@@ -72,59 +75,69 @@ class provider extends \aiprovider_openai\provider {
     ): array {
         $actionname = substr($action, (strrpos($action, '\\') + 1));
         $settings = [];
-        if ($actionname === 'convert_text_to_speech') {
-            // Add the model setting.
-            $settings[] = new \admin_setting_configtext(
-                "aiprovider_openai_extension/action_{$actionname}_model",
-                new \lang_string("action:{$actionname}:model", 'aiprovider_openai_extension'),
-                new \lang_string("action:{$actionname}:model_desc", 'aiprovider_openai_extension'),
-                'gpt-4o-mini-tts',
-                PARAM_TEXT,
-            );
-            // Add API endpoint.
-            $settings[] = new \admin_setting_configtext(
-                "aiprovider_openai_extension/action_{$actionname}_endpoint",
-                new \lang_string("action:{$actionname}:endpoint", 'aiprovider_openai_extension'),
-                '',
-                'https://api.openai.com/v1/audio/speech',
-                PARAM_URL,
-            );
-            $settings[] = new \admin_setting_configselect(
-                "aiprovider_openai_extension/action_{$actionname}_voice",
-                new \lang_string("action:{$actionname}:voice", 'aiprovider_openai_extension'),
-                new \lang_string("action:{$actionname}:voice_desc", 'aiprovider_openai_extension'),
-                'alloy',
-                [
-                    'alloy' => 'Alloy',
-                    'ash' => 'Ash',
-                    'ballad' => 'Ballad',
-                    'coral' => 'Coral',
-                    'echo' => 'Echo',
-                    'fable' => 'Fable',
-                    'nova' => 'Nova',
-                    'onyx' => 'Onyx',
-                    'sage' => 'Sage',
-                    'shimmer' => 'Shimmer',
-                ]
-            );
-            $settings[] = new \admin_setting_configselect(
-                "aiprovider_openai_extension/action_{$actionname}_format",
-                new \lang_string("action:{$actionname}:format", 'aiprovider_openai_extension'),
-                new \lang_string("action:{$actionname}:format_desc", 'aiprovider_openai_extension'),
-                'mp3',
-                ['mp3' => 'mp3', 'wav' => 'wav', 'flac' => 'flac', 'ogg' => 'ogg']
-            );
-            // Add system instruction settings.
-            $settings[] = new \admin_setting_configtextarea(
-                "aiprovider_openai_extension/action_{$actionname}_systeminstruction",
-                new \lang_string("action:{$actionname}:systeminstruction", 'aiprovider_openai_extension'),
-                new \lang_string("action:{$actionname}:systeminstruction_desc", 'aiprovider_openai_extension'),
-                $action::get_system_instruction(),
-                PARAM_TEXT
-            );
-
+        switch($actionname) {
+            case 'convert_text_to_speech':
+                // Add the model setting.
+                $settings[] = new \admin_setting_configtext(
+                    "aiprovider_openai_extension/action_{$actionname}_model",
+                    new \lang_string("action:{$actionname}:model", 'aiprovider_openai_extension'),
+                    new \lang_string("action:{$actionname}:model_desc", 'aiprovider_openai_extension'),
+                    'gpt-4o-mini-tts',
+                    PARAM_TEXT,
+                );
+                // Add API endpoint.
+                $settings[] = new \admin_setting_configtext(
+                    "aiprovider_openai_extension/action_{$actionname}_endpoint",
+                    new \lang_string("action:{$actionname}:endpoint", 'aiprovider_openai_extension'),
+                    '',
+                    'https://api.openai.com/v1/audio/speech',
+                    PARAM_URL,
+                );
+                $settings[] = new \admin_setting_configselect(
+                    "aiprovider_openai_extension/action_{$actionname}_voice",
+                    new \lang_string("action:{$actionname}:voice", 'aiprovider_openai_extension'),
+                    new \lang_string("action:{$actionname}:voice_desc", 'aiprovider_openai_extension'),
+                    'alloy',
+                    [
+                        'alloy' => 'Alloy',
+                        'ash' => 'Ash',
+                        'ballad' => 'Ballad',
+                        'coral' => 'Coral',
+                        'echo' => 'Echo',
+                        'fable' => 'Fable',
+                        'nova' => 'Nova',
+                        'onyx' => 'Onyx',
+                        'sage' => 'Sage',
+                        'shimmer' => 'Shimmer',
+                    ]
+                );
+                $settings[] = new \admin_setting_configselect(
+                    "aiprovider_openai_extension/action_{$actionname}_format",
+                    new \lang_string("action:{$actionname}:format", 'aiprovider_openai_extension'),
+                    new \lang_string("action:{$actionname}:format_desc", 'aiprovider_openai_extension'),
+                    'mp3',
+                    ['mp3' => 'mp3', 'wav' => 'wav', 'flac' => 'flac', 'ogg' => 'ogg']
+                );
+                // Add system instruction settings.
+                $settings[] = new \admin_setting_configtextarea(
+                    "aiprovider_openai_extension/action_{$actionname}_systeminstruction",
+                    new \lang_string("action:{$actionname}:systeminstruction", 'aiprovider_openai_extension'),
+                    new \lang_string("action:{$actionname}:systeminstruction_desc", 'aiprovider_openai_extension'),
+                    $action::get_system_instruction(),
+                    PARAM_TEXT
+                );
+                break;
+            case 'generate_image':
+                // Add the model setting.
+                $settings[] = new \admin_setting_configtext(
+                    "aiprovider_openai_extension/action_{$actionname}_model",
+                    new \lang_string("action:{$actionname}:model", 'aiprovider_openai'),
+                    new \lang_string("action:{$actionname}:model_desc", 'aiprovider_openai'),
+                    'gpt-image-1',
+                    PARAM_TEXT,
+                );
+                break;
         }
-
         return $settings;
     }
 }
