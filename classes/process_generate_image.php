@@ -128,9 +128,10 @@ class process_generate_image extends \aiprovider_openai\process_generate_image {
         global $CFG;
 
         require_once("{$CFG->libdir}/filelib.php");
-
-        $client = \core\di::get(http_client::class);
-        $filename = 'openai_extension' . time() . ".$fileextension";
+        // Create a temporary file.
+        $currenttime = \core\di::get(\core\clock::class)->time();
+        $randompart = $currenttime . bin2hex(random_bytes(5));
+        $filename = 'openai_extension' . $randompart . ".$fileextension";
         $tempdst = make_request_directory() . DIRECTORY_SEPARATOR . $filename;
         file_put_contents($tempdst, base64_decode($base64data));
         $image = new ai_image($tempdst);

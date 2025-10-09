@@ -110,8 +110,9 @@ class process_convert_text_to_speech extends \aiprovider_openai\abstract_process
         $headerctype = $response->getHeaderLine('Content-Type');
         $format = $this->action->get_configuration('format') ?? 'mp3';
         $mimetype = $headerctype !== '' ? $headerctype : $this->guess_mimetype($format);
-
-        $filename = 'openai-tts-' . time() . '.' . $this->extension_from_mimetype_or_format($mimetype, $format);
+        $currenttime = \core\di::get(\core\clock::class)->time();
+        $randompart = $currenttime . bin2hex(random_bytes(5));
+        $filename = 'openai-tts-' . $randompart . '.' . $this->extension_from_mimetype_or_format($mimetype, $format);
 
         // Use the action context if available; fallback to system.
         $context = method_exists($this->action, 'get_contextid') && $this->action->get_contextid()
