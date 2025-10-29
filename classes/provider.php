@@ -17,6 +17,7 @@
 namespace aiprovider_openai_extension;
 
 use core_ai\aiactions\generate_image;
+use local_aixtension\aiactions\convert_speech_to_text;
 use local_aixtension\aiactions\convert_text_to_speech;
 
 /**
@@ -54,6 +55,7 @@ class provider extends \aiprovider_openai\provider {
     public function get_action_list(): array {
         return [
             convert_text_to_speech::class,
+            convert_speech_to_text::class,
             generate_image::class,
         ];
     }
@@ -75,7 +77,7 @@ class provider extends \aiprovider_openai\provider {
     ): array {
         $actionname = substr($action, (strrpos($action, '\\') + 1));
         $settings = [];
-        switch($actionname) {
+        switch ($actionname) {
             case 'convert_text_to_speech':
                 // Add the model setting.
                 $settings[] = new \admin_setting_configtext(
@@ -117,6 +119,24 @@ class provider extends \aiprovider_openai\provider {
                     new \lang_string("action:{$actionname}:format_desc", 'aiprovider_openai_extension'),
                     'mp3',
                     ['mp3' => 'mp3', 'wav' => 'wav', 'flac' => 'flac', 'ogg' => 'ogg']
+                );
+                // Add system instruction settings.
+                $settings[] = new \admin_setting_configtextarea(
+                    "aiprovider_openai_extension/action_{$actionname}_systeminstruction",
+                    new \lang_string("action:{$actionname}:systeminstruction", 'aiprovider_openai_extension'),
+                    new \lang_string("action:{$actionname}:systeminstruction_desc", 'aiprovider_openai_extension'),
+                    $action::get_system_instruction(),
+                    PARAM_TEXT
+                );
+                break;
+            case 'convert_speech_to_text':
+                // Add API endpoint.
+                $settings[] = new \admin_setting_configtext(
+                    "aiprovider_openai_extension/action_{$actionname}_endpoint",
+                    new \lang_string("action:{$actionname}:endpoint", 'aiprovider_openai_extension'),
+                    '',
+                    'https://api.openai.com/v1/audio/transcriptions',
+                    PARAM_URL,
                 );
                 // Add system instruction settings.
                 $settings[] = new \admin_setting_configtextarea(

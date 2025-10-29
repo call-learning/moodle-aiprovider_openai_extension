@@ -13,10 +13,10 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+
 namespace aiprovider_openai_extension;
 
 use aiprovider_openai\abstract_processor;
-use core\http_client;
 use core_ai\ai_image;
 use GuzzleHttp\Psr7\Request;
 use Psr\Http\Message\RequestInterface;
@@ -24,12 +24,16 @@ use Psr\Http\Message\ResponseInterface;
 
 /**
  * Class to process using OpenAI's API with b64_json. Here we try to have a standard way of dealing with images
- * so we kind of override completely the usual/core image provider and use the new model (gpt-image-1).
+ * so we override completely the usual/core image provider and use the new model (gpt-image-1).
  * It requires some different handling as the response is base64 encoded image data rather than a URL and also converts
  * the aspect ratio to a size parameter while transforming the quality and style parameter to the right one.
  * This class extends the existing image generation process to handle base64 encoded images
  * specifically for gpt-image-1.
  * This is a bit of a tweak to the existing openAI image generation process so we can use the new model.
+ *
+ * @package   aiprovider_openai_extension
+ * @copyright   2025 Laurent David <laurent@call-learning.fr>
+ * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class process_generate_image extends \aiprovider_openai\process_generate_image {
     /** @var int The number of images to generate dall-e-3 only supports 1. */
@@ -112,7 +116,6 @@ class process_generate_image extends \aiprovider_openai\process_generate_image {
         return $response;
     }
 
-
     /**
      * Convert the base64 image data to a stored file.
      *
@@ -150,7 +153,6 @@ class process_generate_image extends \aiprovider_openai\process_generate_image {
         $fs = get_file_storage();
         return $fs->create_file_from_string($fileinfo, file_get_contents($tempdst));
     }
-
 
     #[\Override]
     protected function handle_api_success(ResponseInterface $response): array {

@@ -13,9 +13,12 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 namespace aiprovider_openai_extension;
 
 
+use core_ai\aiactions\generate_image;
+use local_aixtension\aiactions\convert_speech_to_text;
 use local_aixtension\aiactions\convert_text_to_speech;
 
 /**
@@ -35,8 +38,10 @@ final class provider_test extends \advanced_testcase {
         $provider = new provider();
         $actionlist = $provider->get_action_list();
         $this->assertIsArray($actionlist);
-        $this->assertCount(1, $actionlist);
+        $this->assertCount(3, $actionlist);
         $this->assertContains(convert_text_to_speech::class, $actionlist);
+        $this->assertContains(convert_speech_to_text::class, $actionlist);
+        $this->assertContains(generate_image::class, $actionlist);
     }
 
     /**

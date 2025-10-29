@@ -13,6 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+
 namespace aiprovider_openai_extension;
 
 use GuzzleHttp\Psr7\Request;
@@ -25,56 +26,13 @@ use Psr\Http\Message\UriInterface;
  * Class to process text-to-speech requests using OpenAI's API.
  * This class extends the abstract processor to handle
  * the specific requirements for generating audio from text.
+ *
+ * @package   aiprovider_openai_extension
+ * @copyright   2025 Laurent David <laurent@call-learning.fr>
+ * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class process_convert_text_to_speech extends \aiprovider_openai\abstract_processor {
-    /**
-     * Define the settings for the text-to-speech action.
-     * This includes the endpoint, model, voice, and format.
-     */
-    public function get_request_definition(): array {
-        return [
-            'input' => [
-                'type' => 'text',
-                'label' => get_string('field_input', 'aiprovider_openai_extension'),
-                'required' => true,
-            ],
-            'model' => [
-                'type' => 'text',
-                'label' => get_string('field_model', 'aiprovider_openai_extension'),
-                'required' => false,
-            ],
-            'voice' => [
-                'type' => 'text',
-                'label' => get_string('field_voice', 'aiprovider_openai_extension'),
-                'required' => false,
-            ],
-            'instructions' => [
-                'type' => 'text',
-                'label' => get_string('field_instructions', 'aiprovider_openai_extension'),
-                'required' => false,
-            ],
-            'response_format' => [
-                'type' => 'text',
-                'label' => get_string('field_response_format', 'aiprovider_openai_extension'),
-                'required' => false,
-            ],
-            'speed' => [
-                'type' => 'text',
-                'label' => get_string('field_response_speed', 'aiprovider_openai_extension'),
-                'required' => false,
-            ],
-            'stream_format' => [
-                'type' => 'text',
-                'label' => get_string('field_response_stream_format', 'aiprovider_openai_extension'),
-                'required' => false,
-            ],
-        ];
-    }
-
-    /**
-     * Create the request object to send to the OpenAI API.
-     * @param string $userid
-     */
+    #[\Override]
     protected function create_request_object(string $userid): RequestInterface {
         $url = $this->get_endpoint();
 
@@ -85,7 +43,7 @@ class process_convert_text_to_speech extends \aiprovider_openai\abstract_process
         $payload = [
             'model' => $model,
             'voice' => $voice,
-            'input' => (string)$this->action->get_configuration('texttoread'),
+            'input' => (string) $this->action->get_configuration('texttoread'),
             'format' => $format, // OpenAI accepte 'mp3', 'wav', 'flac', 'ogg' (selon version API).
         ];
         return new Request(
@@ -98,13 +56,9 @@ class process_convert_text_to_speech extends \aiprovider_openai\abstract_process
         );
     }
 
-    /**
-     * Parse and persist a successful audio response.
-     * Saves a file and returns structured payload used by prepare_response().
-     */
     #[\Override]
     protected function handle_api_success(ResponseInterface $response): array {
-        $content = (string)$response->getBody();
+        $content = (string) $response->getBody();
 
         // Determine mimetype: trust header first, then guess from requested format.
         $headerctype = $response->getHeaderLine('Content-Type');
@@ -123,31 +77,19 @@ class process_convert_text_to_speech extends \aiprovider_openai\abstract_process
         $file = $fs->create_file_from_string([
             'contextid' => $context->id,
             'component' => 'aiprovider_openai_extension',
-            'filearea'  => 'generatedaudio',
-            'itemid'    => 0,
-            'filepath'  => '/',
-            'filename'  => $filename,
+            'filearea' => 'generatedaudio',
+            'itemid' => 0,
+            'filepath' => '/',
+            'filename' => $filename,
         ], $content);
 
         return [
-            'success'  => true,
+            'success' => true,
             'mimetype' => $mimetype,
             'filename' => $filename,
             'filesize' => $file->get_filesize(),
-            'fileid'   => $file->get_id(),
+            'fileid' => $file->get_id(),
         ];
-    }
-
-    /**
-     * Generic parser that delegates to success/error paths.
-     * Kept for compatibility if the abstract expects parse_response().
-     */
-    protected function parse_response(ResponseInterface $response): array {
-        $status = $response->getStatusCode();
-        if ($status < 200 || $status >= 300) {
-            return $this->handle_api_error($response);
-        }
-        return $this->handle_api_success($response);
     }
 
     #[\Override]
@@ -175,11 +117,11 @@ class process_convert_text_to_speech extends \aiprovider_openai\abstract_process
      */
     private function extension_from_mimetype_or_format(string $mimetype, string $fallbackformat): string {
         $map = [
-            'audio/mp3'     => 'mp3',
-            'audio/opus'     => 'opus',
-            'audio/aac'      => 'aac',
-            'audio/flac'     => 'flac',
-            'audio/wav'      => 'wav',
+            'audio/mp3' => 'mp3',
+            'audio/opus' => 'opus',
+            'audio/aac' => 'aac',
+            'audio/flac' => 'flac',
+            'audio/wav' => 'wav',
             'audio/vnd.wave' => 'wav',
         ];
         return $map[strtolower($mimetype)] ?? strtolower($fallbackformat);
@@ -196,10 +138,11 @@ class process_convert_text_to_speech extends \aiprovider_openai\abstract_process
     }
 
     /**
-     * Get the default value for a specific configuration key.
+     * Get default values
      *
-     * @param string $key The configuration key.
-     * @return ?string The default value for the configuration key.
+     * @param string $key
+     * @return string|null
+     * @throws \dml_exception
      */
     protected function get_default(string $key): ?string {
         if ($key === 'voice') {

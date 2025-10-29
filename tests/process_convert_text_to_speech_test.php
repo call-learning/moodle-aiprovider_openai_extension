@@ -13,6 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 namespace aiprovider_openai_extension;
 
 use core_ai\aiactions\base;
@@ -26,7 +27,7 @@ use local_aixtension\aiactions\convert_text_to_speech;
  * @package   aiprovider_openai_extension
  * @copyright   2025 Laurent David <laurent@call-learning.fr>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @coversDefaultClass \aiprovider_openai_extension\process_convert_text_to_speech
+ * @covers \aiprovider_openai_extension\process_convert_text_to_speech
  */
 final class process_convert_text_to_speech_test extends \advanced_testcase {
     /** @var string Raw audio bytes for a successful response. */
@@ -63,7 +64,7 @@ final class process_convert_text_to_speech_test extends \advanced_testcase {
      * @param int $userid The user id to use in the action.
      */
     private function create_action(int $userid = 1): void {
-        $this->action =  new convert_text_to_speech(
+        $this->action = new convert_text_to_speech(
             contextid: 1,
             userid: $userid,
             texttoread: 'This is a sample text to read',
@@ -96,12 +97,21 @@ final class process_convert_text_to_speech_test extends \advanced_testcase {
         $responses = [
             500 => new Response(500, ['Content-Type' => 'application/json']),
             503 => new Response(503, ['Content-Type' => 'application/json']),
-            401 => new Response(401, ['Content-Type' => 'application/json'],
-                '{"error": {"message": "Invalid Authentication"}}'),
-            404 => new Response(404, ['Content-Type' => 'application/json'],
-                '{"error": {"message": "You must be a member of an organization to use the API"}}'),
-            429 => new Response(429, ['Content-Type' => 'application/json'],
-                '{"error": {"message": "Rate limit reached for requests"}}'),
+            401 => new Response(
+                401,
+                ['Content-Type' => 'application/json'],
+                '{"error": {"message": "Invalid Authentication"}}'
+            ),
+            404 => new Response(
+                404,
+                ['Content-Type' => 'application/json'],
+                '{"error": {"message": "You must be a member of an organization to use the API"}}'
+            ),
+            429 => new Response(
+                429,
+                ['Content-Type' => 'application/json'],
+                '{"error": {"message": "Rate limit reached for requests"}}'
+            ),
         ];
 
         $processor = new process_convert_text_to_speech($this->provider, $this->action);
@@ -231,29 +241,6 @@ final class process_convert_text_to_speech_test extends \advanced_testcase {
     }
 
     /**
-     * Test storing the audio bytes as a moodle file.
-     * @covers ::store_audio_file
-     */
-    public function test_store_audio_file(): void {
-        $this->resetAfterTest();
-        $this->setUser($this->getDataGenerator()->create_user());
-
-        $processor = new process_convert_text_to_speech($this->provider, $this->action);
-        $method = new \ReflectionMethod($processor, 'store_audio_file');
-
-        $contextid = 1;
-        $content = $this->responsebodymp3;
-        $filename = 'speech.mp3';
-        $mimetype = 'audio/mp3';
-
-        $filenobj = $method->invoke($processor, $contextid, $content, $filename, $mimetype);
-
-        $this->assertEquals('speech.mp3', $filenobj->get_filename());
-        $this->assertEquals('audio/mp3', $filenobj->get_mimetype());
-        $this->assertGreaterThan(0, $filenobj->get_filesize());
-    }
-
-    /**
      * Test process(): full happy path.
      * @covers ::process
      */
@@ -323,8 +310,8 @@ final class process_convert_text_to_speech_test extends \advanced_testcase {
         $clock = $this->mock_clock_with_frozen();
 
         // Enable user-level rate limiting for THIS plugin.
-        set_config('enableuserratelimit', 1, 'aiprovider_openai_extension');
-        set_config('userratelimit', 1, 'aiprovider_openai_extension');
+        set_config('enableuserratelimit', 1, 'aiprovider_openai');
+        set_config('userratelimit', 1, 'aiprovider_openai');
 
         ['mock' => $mock] = $this->get_mocked_http_client();
 
@@ -381,8 +368,8 @@ final class process_convert_text_to_speech_test extends \advanced_testcase {
         $clock = $this->mock_clock_with_frozen();
 
         // Enable global rate limiting for THIS plugin.
-        set_config('enableglobalratelimit', 1, 'aiprovider_openai_extension');
-        set_config('globalratelimit', 1, 'aiprovider_openai_extension');
+        set_config('enableglobalratelimit', 1, 'aiprovider_openai');
+        set_config('globalratelimit', 1, 'aiprovider_openai');
 
         ['mock' => $mock] = $this->get_mocked_http_client();
 
