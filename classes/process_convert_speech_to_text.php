@@ -45,17 +45,26 @@ class process_convert_speech_to_text extends \aiprovider_openai\abstract_process
             'model' => $model,
             'language' => $language,
             'response_format' => 'verbose_json', // We need the start/end of each words.
-            'timestamps_granularities' => ['word', 'segment'], // Get timestamps for words and probabilty for segments.
+            'timestamp_granularities' => ['word', 'segment'], // Get timestamps for words and probabilty for segments.
         ];
         // Build the multipart array.
         $multipart = [];
 
         // Add form fields.
         foreach ($payload as $key => $value) {
-            $multipart[] = [
-                'name' => $key,
-                'contents' => is_array($value) ? json_encode($value) : $value,
-            ];
+            if (is_array($value)) {
+                foreach ($value as $item) {
+                    $multipart[] = [
+                        'name' => $key . '[]',
+                        'contents' => $item,
+                    ];
+                }
+            } else {
+                $multipart[] = [
+                    'name' => $key,
+                    'contents' => $value,
+                ];
+            }
         }
 
         // Add the file.
@@ -179,7 +188,7 @@ class process_convert_speech_to_text extends \aiprovider_openai\abstract_process
 
     #[\Override]
     protected function get_endpoint(): UriInterface {
-        return new Uri(get_config('aiprovider_openai_extension', 'action_convert_speech_to_text_endpoint'));
+        return new Uri(get_config('aiprovider_openai_extension', 'action_convert_speech_to_text_endpoint')) ;
     }
 
     #[\Override]
