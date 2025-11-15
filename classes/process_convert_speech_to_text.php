@@ -45,6 +45,7 @@ class process_convert_speech_to_text extends \aiprovider_openai\abstract_process
             'model' => $model,
             'language' => $language,
             'response_format' => 'verbose_json', // We need the start/end of each words.
+            'include' => ['logprobs'], // Get words and segments info.
             'timestamp_granularities' => ['word', 'segment'], // Get timestamps for words and probabilty for segments.
         ];
         // Build the multipart array.
@@ -164,6 +165,7 @@ class process_convert_speech_to_text extends \aiprovider_openai\abstract_process
             'flac' => 'audio/flac',
             'wav' => 'audio/wav',
             'pcm' => 'audio/vnd.wave',
+            'webm' => 'audio/webm',
             default => 'application/octet-stream',
         };
     }
@@ -177,6 +179,7 @@ class process_convert_speech_to_text extends \aiprovider_openai\abstract_process
     private function extension_from_mimetype_or_format(string $mimetype, string $fallbackformat): string {
         $map = [
             'audio/mp3'     => 'mp3',
+            'audio/webm'     => 'webm',
             'audio/opus'     => 'opus',
             'audio/aac'      => 'aac',
             'audio/flac'     => 'flac',
@@ -193,7 +196,7 @@ class process_convert_speech_to_text extends \aiprovider_openai\abstract_process
 
     #[\Override]
     protected function get_model(): string {
-        return 'whisper-1'; // For now we use only whisper-1 for speech to text as it is the only one giving the required details.
+        return 'whisper-1';
     }
 
     /**
